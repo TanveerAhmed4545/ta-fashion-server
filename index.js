@@ -30,7 +30,16 @@ async function run() {
     const productsCollection = client.db("taFashion").collection("products");
 
     app.get("/Products", async (req, res) => {
-      const result = await productsCollection.find().toArray();
+      const { search = "" } = req.query;
+
+      const query = {};
+      if (search) {
+        query.$or = [
+          { ProductName: { $regex: search, $options: "i" } },
+          { BrandName: { $regex: search, $options: "i" } },
+        ];
+      }
+      const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
 
