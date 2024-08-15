@@ -30,7 +30,7 @@ async function run() {
     const productsCollection = client.db("taFashion").collection("products");
 
     app.get("/Products", async (req, res) => {
-      const { search = "" } = req.query;
+      const { search = "", priceRange } = req.query;
       const page = parseInt(req.query.page);
       console.log(req.query);
       const resultsPerPage = parseInt(9);
@@ -41,8 +41,26 @@ async function run() {
           { BrandName: { $regex: search, $options: "i" } },
         ];
       }
+
+      // Split and parse price range
+      const [minPrice, maxPrice] = priceRange
+        ? priceRange.split("-").map(parseFloat)
+        : [null, null];
+      // Filtering by Price Range
+      if (minPrice && maxPrice) {
+        query.Price = {
+          $gte: parseFloat(minPrice),
+          $lte: parseFloat(maxPrice),
+        };
+      } else if (minPrice) {
+        query.Price = { $gte: parseFloat(minPrice) };
+      } else if (maxPrice) {
+        query.Price = { $lte: parseFloat(maxPrice) };
+      }
+
       const result = await productsCollection
         .find(query)
+
         .skip(page * resultsPerPage)
         .limit(resultsPerPage)
         .toArray();
