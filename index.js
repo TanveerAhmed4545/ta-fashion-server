@@ -31,7 +31,9 @@ async function run() {
 
     app.get("/Products", async (req, res) => {
       const { search = "" } = req.query;
-
+      const page = parseInt(req.query.page);
+      console.log(req.query);
+      const resultsPerPage = parseInt(9);
       const query = {};
       if (search) {
         query.$or = [
@@ -39,8 +41,17 @@ async function run() {
           { BrandName: { $regex: search, $options: "i" } },
         ];
       }
-      const result = await productsCollection.find(query).toArray();
+      const result = await productsCollection
+        .find(query)
+        .skip(page * resultsPerPage)
+        .limit(resultsPerPage)
+        .toArray();
       res.send(result);
+    });
+
+    app.get("/productCount", async (req, res) => {
+      const count = await productsCollection.estimatedDocumentCount();
+      res.send({ count });
     });
 
     // Send a ping to confirm a successful connection
