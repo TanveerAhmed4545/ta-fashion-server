@@ -30,7 +30,13 @@ async function run() {
     const productsCollection = client.db("taFashion").collection("products");
 
     app.get("/Products", async (req, res) => {
-      const { search = "", priceRange, sortBy = "", brand = "" } = req.query;
+      const {
+        search = "",
+        priceRange,
+        sortBy = "",
+        brand = "",
+        category = "",
+      } = req.query;
       const page = parseInt(req.query.page);
       // console.log(req.query);
       const resultsPerPage = parseInt(9);
@@ -46,6 +52,11 @@ async function run() {
       // Add Brand Filter
       if (brand) {
         query.BrandName = brand;
+      }
+
+      // Add Category Filter
+      if (category) {
+        query.Category = category;
       }
 
       // Split and parse price range
