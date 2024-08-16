@@ -30,9 +30,9 @@ async function run() {
     const productsCollection = client.db("taFashion").collection("products");
 
     app.get("/Products", async (req, res) => {
-      const { search = "", priceRange, sortBy = "" } = req.query;
+      const { search = "", priceRange, sortBy = "", brand = "" } = req.query;
       const page = parseInt(req.query.page);
-      console.log(req.query);
+      // console.log(req.query);
       const resultsPerPage = parseInt(9);
 
       const query = {};
@@ -41,6 +41,11 @@ async function run() {
           { ProductName: { $regex: search, $options: "i" } },
           { BrandName: { $regex: search, $options: "i" } },
         ];
+      }
+
+      // Add Brand Filter
+      if (brand) {
+        query.BrandName = brand;
       }
 
       // Split and parse price range
@@ -59,7 +64,7 @@ async function run() {
         query.Price = { $lte: parseFloat(maxPrice) };
       }
 
-      // Sorting logic
+      // Sorting
       let sortOptions = {};
       if (sortBy === "price-asc") {
         sortOptions = { Price: 1 }; // Sort by Price: Low to High
